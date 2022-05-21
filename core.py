@@ -66,14 +66,46 @@ class Sequential:
                 self.params["b"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, 1)
 
     def summary(self):
-        for i in self.layers:
-            print(i)
-        pass
+        w_list = []
+        act_list = ['Relu',"Sigmoid", "Linear", 'Tanh', "LeakyReLu" ]
+        for i in self.params:
+            if 'w' in i:
+                w_list.append(i)
+        print('-'*75) #19
+        print(7*' ' +"Layer (type)" + 15*' ' + "Output Shape" + ' '*15 + "Param #")
+        print('=' * 75)
+        k = 0
+        for i in range(1, len(self.layers)):
+            x = 16 - len(str(self.layers[i]))
+            s1 = "{} {}-{}".format(x*' ', self.layers[i], (i))
+            if any(j == str(self.layers[i])  for j in act_list):  
+                pass
+            else:
+                x = 22 - len(str(self.params[w_list[k]].shape[0])) - len(str(self.x.shape[1]))
+                s2 = "{} [{},{}]".format(x*' ', self.params[w_list[k]].shape[0], self.x.shape[1])
+                if k == 0:
+                    if self.layers[i].use_bias == True:
+                        x = 20 - len(str(self.x.shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0]))
+                        s3 = "{} {}".format(x*' ', self.x.shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0])
+                    else:
+                        x = 20 - len(str(self.x.shape[0]*self.params[w_list[k]].shape[0]))
+                        s3 = "{} {}".format(x*' ', self.x.shape[0]*self.params[w_list[k]].shape[0])
+                else:
+                    if self.layers[i].use_bias == True:
+                        x = 20 - len(str(self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0]))
+                        s3 = "{} {}".format(x*' ', self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0])
+                    else:
+                        x = 20 - len(str(self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0]))
+                        s3 = "{} {}".format(x*' ', self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0])
+                k = k+1
+            print(s1, s2, s3)
+        
+                
+            
+    def forward(self, x):
+        self.x  = x
 
-    def forward(self):
-        pass
-
-
+x = np.random.rand(4, 546)
 model = Sequential()
 model.add(Input(4))
 model.add(Dense(128))
@@ -83,5 +115,7 @@ model.add(Tanh())
 model.add(Dense(13))
 model.add(Sigmoid())
 model.initialize_weights()
+model.forward(x)
+
 
 model.summary()
