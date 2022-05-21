@@ -7,12 +7,11 @@ class Layer:
         return self.layer_name
 
 class Conv2D(Layer):
-    def __init__(self, filters, kernel_size, activation=None, use_bias=True, **kwargs):
+    def __init__(self, filters, kernel_size, activation=None, **kwargs):
         self.layer_name = "Conv2D"
         self.filter = filters
         self.kernel_size = kernel_size
         self.activation = activation
-        self.use_bias = use_bias
         for key, value in kwargs.items():
             if key == "input_shape":
                 self.input_shape = value
@@ -77,6 +76,11 @@ class Sequential:
                 self.params["b"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, 1)
 
         trainable_conv_layers = list(filter(lambda layer: issubclass(type(layer), Conv2D) == True, self.layers))
+        for i in range(len(trainable_conv_layers)):
+            filters = trainable_conv_layers[i].filters
+            kernel_size = trainable_conv_layers[i].kernel_size
+            for j in range(kernel_size):
+                self.params["conv"+str(i)+"w"+str(j)] = np.random.random(filters)
 
     def summary(self):
         for i in self.layers:
@@ -88,6 +92,7 @@ class Sequential:
 
 
 model = Sequential()
+model.add(Conv2D(256, (3,3)))
 model.add(Input(4))
 model.add(Dense(128))
 model.add(LeakyReLu())
