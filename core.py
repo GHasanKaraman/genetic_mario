@@ -9,7 +9,7 @@ class Layer:
 class Conv2D(Layer):
     def __init__(self, filters, kernel_size, activation=None, **kwargs):
         self.layer_name = "Conv2D"
-        self.filter = filters
+        self.filters = filters
         self.kernel_size = kernel_size
         self.activation = activation
         for key, value in kwargs.items():
@@ -79,7 +79,7 @@ class Sequential:
         for i in range(len(trainable_conv_layers)):
             filters = trainable_conv_layers[i].filters
             kernel_size = trainable_conv_layers[i].kernel_size
-            for j in range(kernel_size):
+            for j in range(filters):
                 self.params["conv"+str(i)+"w"+str(j)] = np.random.random(filters)
 
     def summary(self):
@@ -102,4 +102,7 @@ model.add(Dense(13))
 model.add(Sigmoid())
 model.initialize_weights()
 
-model.summary()
+for i in model.params:
+    print(i)
+
+#model.summary()
