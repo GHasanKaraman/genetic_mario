@@ -12,6 +12,7 @@ class Conv2D(Layer):
         self.filters = filters
         self.kernel_size = kernel_size
         self.activation = activation
+        self.use_bias = False
         for key, value in kwargs.items():
             if key == "input_shape":
                 self.input_shape = value
@@ -124,8 +125,8 @@ class Sequential:
 
 x = np.random.rand(4, 546)
 model = Sequential()
-model.add(Conv2D(256, (3,3)))
 model.add(Input(4))
+model.add(Conv2D(256, (3,3)))
 model.add(Dense(128))
 model.add(LeakyReLu())
 model.add(Dense(25))
@@ -135,8 +136,4 @@ model.add(Sigmoid())
 model.initialize_weights()
 model.forward(x)
 
-
-for i in model.params:
-    print(i)
-
-#model.summary()
+model.summary()
