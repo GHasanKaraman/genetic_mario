@@ -81,7 +81,7 @@ class Sequential:
             filters = trainable_conv_layers[i].filters
             kernel_size = trainable_conv_layers[i].kernel_size
             for j in range(filters):
-                self.params["conv"+str(i)+"w"+str(j)] = np.random.random(filters)
+                self.params["conv"+str(i)+"w"+str(j)] = np.random.random(kernel_size)
 
     def summary(self):
         w_list = []
