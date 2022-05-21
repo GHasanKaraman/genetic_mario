@@ -97,6 +97,7 @@ class Sequential:
             x = 16 - len(str(self.layers[i]))
             s1 = "{} {}-{}".format(x*' ', self.layers[i], (i))
             if any(j == str(self.layers[i])  for j in act_list):  
+                s3 = "{} {}".format(19*' ', 0)
                 pass
             else:
                 x = 22 - len(str(self.params[w_list[k]].shape[0])) - len(str(self.x.shape[1]))
@@ -129,7 +130,7 @@ model.add(Input(4))
 model.add(Conv2D(256, (3,3)))
 model.add(Dense(128))
 model.add(LeakyReLu())
-model.add(Dense(25))
+model.add(Dense(25, use_bias=(False)))
 model.add(Tanh())
 model.add(Dense(13))
 model.add(Sigmoid())
