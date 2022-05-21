@@ -6,6 +6,16 @@ class Layer:
     def __repr__(self):
         return self.layer_name
 
+class Conv2D(Layer):
+    def __init__(self, filters, kernel_size, activation=None, **kwargs):
+        self.layer_name = "Conv2D"
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.activation = activation
+        for key, value in kwargs.items():
+            if key == "input_shape":
+                self.input_shape = value
+
 class Dense(Layer):
     def __init__(self, units, activation = None, use_bias = True, **kwargs):
         self.layer_name = "Dense"
@@ -65,6 +75,13 @@ class Sequential:
             if trainable_layers[i+1].use_bias == True:
                 self.params["b"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, 1)
 
+        trainable_conv_layers = list(filter(lambda layer: issubclass(type(layer), Conv2D) == True, self.layers))
+        for i in range(len(trainable_conv_layers)):
+            filters = trainable_conv_layers[i].filters
+            kernel_size = trainable_conv_layers[i].kernel_size
+            for j in range(filters):
+                self.params["conv"+str(i)+"w"+str(j)] = np.random.random(filters)
+
     def summary(self):
         w_list = []
         act_list = ['Relu',"Sigmoid", "Linear", 'Tanh', "LeakyReLu" ]
@@ -107,6 +124,7 @@ class Sequential:
 
 x = np.random.rand(4, 546)
 model = Sequential()
+model.add(Conv2D(256, (3,3)))
 model.add(Input(4))
 model.add(Dense(128))
 model.add(LeakyReLu())
@@ -118,4 +136,7 @@ model.initialize_weights()
 model.forward(x)
 
 
-model.summary()
+for i in model.params:
+    print(i)
+
+#model.summary()
