@@ -20,7 +20,7 @@ class Input(Dense):
     def __init__(self, input_dim):
         self.layer_name = "Input"
         self.units = input_dim
-        self.use_bias = False
+        self.use_bias = True
 
 class Activation(Layer):
     pass
@@ -62,7 +62,8 @@ class Sequential:
             if hasattr(trainable_layers[i+1], "input_dim"):
                 raise RuntimeError("You cannot add multiple input dimensions. It is only for the first layer!")
             self.params["w"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, trainable_layers[i].units)
-            self.params["b"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, 1)
+            if trainable_layers[i+1].use_bias == True:
+                self.params["b"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, 1)
 
     def summary(self):
         for i in self.layers:
@@ -74,11 +75,13 @@ class Sequential:
 
 
 model = Sequential()
+model.add(Input(4))
 model.add(Dense(128))
 model.add(LeakyReLu())
 model.add(Dense(25))
 model.add(Tanh())
 model.add(Dense(13))
 model.add(Sigmoid())
+model.initialize_weights()
 
 model.summary()
