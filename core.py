@@ -54,7 +54,15 @@ class Sequential:
         self.layers.append(layer)
 
     def initialize_weights(self):
-        pass
+        trainable_layers = list(filter(lambda layer: issubclass(type(layer), Dense) == True, self.layers)) 
+        if hasattr(trainable_layers[0], "input_dim"):
+            trainable_layers.insert(0, Input(trainable_layers[0].input_dim))
+            delattr(trainable_layers[1], "input_dim")
+        for i in range(len(trainable_layers) - 1):
+            if hasattr(trainable_layers[i+1], "input_dim"):
+                raise RuntimeError("You cannot add multiple input dimensions. It is only for the first layer!")
+            self.params["w"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, trainable_layers[i].units)
+            self.params["b"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, 1)
 
     def summary(self):
         for i in self.layers:
