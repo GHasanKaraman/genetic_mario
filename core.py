@@ -6,6 +6,17 @@ class Layer:
     def __repr__(self):
         return self.layer_name
 
+class Conv2D(Layer):
+    def __init__(self, filters, kernel_size, activation=None, use_bias=True, **kwargs):
+        self.layer_name = "Conv2D"
+        self.filter = filters
+        self.kernel_size = kernel_size
+        self.activation = activation
+        self.use_bias = use_bias
+        for key, value in kwargs.items():
+            if key == "input_shape":
+                self.input_shape = value
+
 class Dense(Layer):
     def __init__(self, units, activation = None, use_bias = True, **kwargs):
         self.layer_name = "Dense"
@@ -64,6 +75,8 @@ class Sequential:
             self.params["w"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, trainable_layers[i].units)
             if trainable_layers[i+1].use_bias == True:
                 self.params["b"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, 1)
+
+        trainable_conv_layers = list(filter(lambda layer: issubclass(type(layer), Conv2D) == True, self.layers))
 
     def summary(self):
         for i in self.layers:
