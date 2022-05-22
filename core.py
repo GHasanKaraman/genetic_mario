@@ -119,7 +119,7 @@ class Sequential:
                     total_param = total_param + self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]
             else:
                 x = 22 - len(str(self.params[w_list[k]].shape[0])) - len(str(self.x.shape[1]))
-                s2 = "{} [{},{}]".format(x*' ', 55, self.x.shape[1])
+                s2 = "{} [{},{}]".format(x*' ', self.params[w_list[k]].shape[0], self.x.shape[1])
                 if k == 0:
                     if self.layers[i].use_bias == True:
                         x = 20 - len(str(self.x.shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0]))
@@ -138,7 +138,7 @@ class Sequential:
                         x = 20 - len(str(self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0]))
                         s3 = "{} {}".format(x*' ', self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0])
                         total_param = total_param + self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0]
-            k = k+1
+                k = k+1
             print(s1, s2, s3)
         print('='*68 + "\n" + "Total Params: "+str(total_param))
 
