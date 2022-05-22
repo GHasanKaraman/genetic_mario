@@ -80,8 +80,7 @@ class Sequential:
         for i in range(len(trainable_conv_layers)):
             filters = trainable_conv_layers[i].filters
             kernel_size = trainable_conv_layers[i].kernel_size
-            for j in range(filters):
-                self.params["conv"+str(i)+"w"+str(j)] = np.random.random(kernel_size)
+            self.params["conv"+str(i)+"w"] = np.random.randn(filters, kernel_size[0], kernel_size[1])
 
     def summary(self):
         w_list = []
@@ -118,8 +117,6 @@ class Sequential:
                         s3 = "{} {}".format(x*' ', self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0])
                 k = k+1
             print(s1, s2, s3)
-        
-                
             
     def forward(self, x):
         self.x  = x
@@ -130,11 +127,14 @@ model.add(Input(4))
 model.add(Conv2D(256, (3,3)))
 model.add(Dense(128))
 model.add(LeakyReLu())
-model.add(Dense(25, use_bias=(False)))
+model.add(Dense(25))
 model.add(Tanh())
 model.add(Dense(13))
 model.add(Sigmoid())
 model.initialize_weights()
 model.forward(x)
+
+for i in model.params:
+    print(i)
 
 model.summary()
