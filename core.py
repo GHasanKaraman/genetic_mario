@@ -88,16 +88,34 @@ class Sequential:
         for i in self.params:
             if 'w' in i:
                 w_list.append(i)
-        print('-'*75) #19
+        print('-'*68) 
         print(7*' ' +"Layer (type)" + 15*' ' + "Output Shape" + ' '*15 + "Param #")
-        print('=' * 75)
+        print('=' * 68)
         k = 0
+        total_param = 0
+        
         for i in range(1, len(self.layers)):
             x = 16 - len(str(self.layers[i]))
             s1 = "{} {}-{}".format(x*' ', self.layers[i], (i))
             if any(j == str(self.layers[i])  for j in act_list):  
                 s3 = "{} {}".format(19*' ', 0)
-                pass
+            elif str(self.layers[i]) == "Conv2D":
+                if len(self.x.shape) == 2:
+                    x1 = self.x.shape[0] - self.layers[i].kernel_size[0] + 1
+                    x2 = self.x.shape[1] - self.layers[i].kernel_size[1] + 1
+                    x = 25 - len("[{},{},{},{}]".format(self.layers[i].filters, x1, x2, 1))
+                    s2 = "{} [{},{},{},{}]".format(x*' ', self.layers[i].filters, x1, x2, 1)
+                    x = 20 - len(str(self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]))
+                    s3 = "{} {}".format(' '*x, self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1])
+                    total_param = total_param + self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]
+                elif self.x.shape[2] == 3:
+                    x1 = self.x.shape[0] - self.layers[i].kernel_size[0] + 1
+                    x2 = self.x.shape[1] - self.layers[i].kernel_size[1] + 1
+                    x = 22 - len(str(self.params[w_list[k]].shape[0])) - len(str(self.x.shape[1]))
+                    s2 = "{} [{},{},{},{}]".format(x*' ', self.layers[i].filters, x1, x2, 3)
+                    x = 20 - len(str(self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]))
+                    s3 = "{} {}".format(' '*x, self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1])
+                    total_param = total_param + self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]
             else:
                 x = 22 - len(str(self.params[w_list[k]].shape[0])) - len(str(self.x.shape[1]))
                 s2 = "{} [{},{}]".format(x*' ', self.params[w_list[k]].shape[0], self.x.shape[1])
@@ -105,16 +123,20 @@ class Sequential:
                     if self.layers[i].use_bias == True:
                         x = 20 - len(str(self.x.shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0]))
                         s3 = "{} {}".format(x*' ', self.x.shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0])
+                        total_param = total_param + self.x.shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0]
                     else:
                         x = 20 - len(str(self.x.shape[0]*self.params[w_list[k]].shape[0]))
                         s3 = "{} {}".format(x*' ', self.x.shape[0]*self.params[w_list[k]].shape[0])
+                        total_param = total_param + self.x.shape[0]*self.params[w_list[k]].shape[0]
                 else:
                     if self.layers[i].use_bias == True:
                         x = 20 - len(str(self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0]))
                         s3 = "{} {}".format(x*' ', self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0])
+                        total_param = total_param + self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0] + self.params[w_list[k]].shape[0]
                     else:
                         x = 20 - len(str(self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0]))
                         s3 = "{} {}".format(x*' ', self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0])
+                        total_param = total_param + self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0]
                 k = k+1
             print(s1, s2, s3)
 
@@ -139,13 +161,13 @@ class Sequential:
 
 
 
-x = np.random.rand(4, 546)
+x = np.random.rand(128, 256)
 model = Sequential()
 model.add(Input(4))
 model.add(Conv2D(256, (3,3)))
 model.add(Dense(128))
 model.add(LeakyReLu())
-model.add(Dense(25))
+model.add(Dense(25, use_bias=(False)))
 model.add(Tanh())
 model.add(Dense(13))
 model.add(Sigmoid())
