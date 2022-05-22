@@ -40,17 +40,29 @@ class Linear(Activation):
     def __init__(self):
         self.layer_name = "Linear"
 
+    def function(self, X):
+        return X
+
 class ReLu(Activation):
     def __init__(self):
         self.layer_name = "ReLu"
+
+    def function(self, X):
+        return np.maximum(0, X)
 
 class Sigmoid(Activation):
     def __init__(self):
         self.layer_name = "Sigmoid"
 
+    def function(self, X):
+        return 1/(1+np.exp(-X))
+
 class Tanh(Activation):
     def __init__(self):
         self.layer_name = "Tanh"
+
+    def function(self, X):
+        return (np.exp(X)-np.exp(-X))/(np.exp(X)+np.exp(-X))
 
 class LeakyReLu(Activation):
     def __init__(self):
@@ -140,33 +152,33 @@ class Sequential:
                 k = k+1
             print(s1, s2, s3)
 
-    def iterate_slices(self, image, kernel_size):
+    def iterate_slices(self, image):
         h, w = image.shape
 
-        for r in range(h - (kernel_size[0] - 1)):
-            for c in range(w - kernel_size[1] - 1):
-                yield image[r:r+kernel_size[0], c:c+kernel_size[1]], r, c
+        for r in range(h - 2):
+            for c in range(w - 2):
+                yield image[r:r+3, c:c+3], r, c
 
-    def convolve(self, input, filters, kernel_size):
+    def convolve(self, input, filters):
         h, w = input.shape
 
-        output = np.zeros((h - kernel_size[0] + 1, w - kernel_size[1] + 1, filters.shape[0]))
+        output = np.zeros((h - 2, w - 2, filters.shape[0]))
 
-        for slice, r, c in self.iterate_slices(input, kernel_size):
+        for slice, r, c in self.iterate_slices(input):
             output[r, c] = np.sum(slice*filters, axis = (1, 2))
         return output
 
     def forward(self, X):
         self.X = X
-    
 
+        for layer in self.layers:
+            pass
 
-x = np.random.rand(128, 256)
 model = Sequential()
 model.add(Input(4))
-model.add(Conv2D(256, (3,3)))
+model.add(Conv2D(5, (3,3)))
 model.add(Dense(128))
-model.add(LeakyReLu())
+model.add(ReLu())
 model.add(Dense(25, use_bias=(False)))
 model.add(Tanh())
 model.add(Dense(13))
@@ -176,86 +188,73 @@ model.forward(x)
 
 from PIL import Image
 
-img = Image.open(r"C:\Users\ersam\OneDrive\Desktop\angelina.jpg").convert("L")
+img = Image.open(r"C:\Users\hasan\Desktop\angelina.jpg").convert("L")
 img = img.resize((150, 200))
-#img.show()
-num_filter = 15
-kernel_size = (3, 3)
 #filters = np.random.randn(num_filter, kernel_size[0], kernel_size[1])
-filters = np.array([[[5, 0, -7],
-[3, -5, 4],
-[-9, 2, 7]],[[5, 0, -7],
-[3, -5, 4],
-[-9, 2, 7]],[[9, 2, -9],
-[3, -5, 1],
-[-9, 2, 7]],[[9, -2, -9],
-[1, 0, 1],
-[-9, 2, 7]],[[9, -2, -9],
-[1, 0, 1],
-[-9, 2, 9]],[[2, 1, -1],
-[5, 0, -5],
-[2, 0, -3]],[[1, 1, -1],
-[1, 0, -1],
-[1, 0, -1]],[[1, 1, 1],
-[0, 0, 0],
-[-1, -1, -1]],[[1/16, 2/16, 1/16],
-[2/16, 4/16, 2/16],
-[1/16, 2/16, 1/16]],[[-1, -1, -1],
- [-1, 9, -1],
- [-1, -1, -1]],[[0, -1, 0],
-  [-1, 5, -1],
-  [0, -1, 0]],[[1/9, 1/9, 1/9],
-   [1/9, 1/9, 1/9],
-   [1/9, 1/9, 1/9]],[[-1, 0, 1],
+filters = np.array([
+    [[5, 0, -7],
+    [3, -5, 4],
+    [-9, 2, 7]],
+    
+    [[5, 0, -7],
+    [3, -5, 4],
+    [-9, 2, 7]],
+    
+    [[9, 2, -9],
+    [3, -5, 1],
+    [-9, 2, 7]],
+    
+    [[9, -2, -9],
+    [1, 0, 1],
+    [-9, 2, 7]],
+    
+    [[9, -2, -9],
+    [1, 0, 1],
+    [-9, 2, 9]],
+    
+    [[2, 1, -1],
+    [5, 0, -5],
+    [2, 0, -3]],
+    
+    [[1, 1, -1],
+    [1, 0, -1],
+    [1, 0, -1]],
+    
+    [[1, 1, 1],
+    [0, 0, 0],
+    [-1, -1, -1]],
+    
+    [[1/16, 2/16, 1/16],
+    [2/16, 4/16, 2/16],
+    [1/16, 2/16, 1/16]],
+    
+    [[-1, -1, -1],
+    [-1, 9, -1],
+    [-1, -1, -1]],
+    
+    [[0, -1, 0],
+    [-1, 5, -1],
+    [0, -1, 0]],
+    
+    [[1/9, 1/9, 1/9],
+    [1/9, 1/9, 1/9],
+    [1/9, 1/9, 1/9]],
+    
+    [[-1, 0, 1],
     [-2, 0, 2],
-    [1, 0, 1]],[[5, 5, 5],
-     [-3, 0, -3],
-     [-3, -3, -3]],[[-1, -2, -1],
-      [0, 0, 0],
-      [1, 2, 1]]])
-
-
-
-
-
-
-
-
-
+    [1, 0, 1]],
     
-
-
-
-
-
-                                 
-            
-                                         
-[[-1, -1, -1],
- [-1, 4, -1],
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                         
+    [[5, 5, 5],
+    [-3, 0, -3],
+    [-3, -3, -3]],
     
-                          
-"""                               
-                                         
+    [[-1, -2, -1],
+    [0, 0, 0],
+    [1, 2, 1]]])
 
+out = model.convolve(np.array(img), filters)
 
-out = model.convolve(np.array(img), filters, kernel_size)
-out = out.reshape(-1, 198, 148)
-
-Image.fromarray(out[0]).show()
+for i in range(14):
+    Image.fromarray(out[:, :, i]).show()
 
 #model.summary()
