@@ -158,7 +158,7 @@ class Sequential:
 
     def forward(self, X):
         self.X = X
-
+    
 
 
 x = np.random.rand(128, 256)
@@ -176,16 +176,84 @@ model.forward(x)
 
 from PIL import Image
 
-img = Image.open(r"C:\Users\hasan\Desktop\angelina.jpg").convert("L")
+img = Image.open(r"C:\Users\ersam\OneDrive\Desktop\angelina.jpg").convert("L")
 img = img.resize((150, 200))
 #img.show()
 num_filter = 15
 kernel_size = (3, 3)
-filters = np.random.randn(num_filter, kernel_size[0], kernel_size[1])
-filters = np.array([[[1, 2, 1],
-                    [2, 4, 2],
-                    [1, 2, 1]]])
-out = model.convolve(np.array(img), filters,kernel_size)
+#filters = np.random.randn(num_filter, kernel_size[0], kernel_size[1])
+filters = np.array([[[5, 0, -7],
+[3, -5, 4],
+[-9, 2, 7]],[[5, 0, -7],
+[3, -5, 4],
+[-9, 2, 7]],[[9, 2, -9],
+[3, -5, 1],
+[-9, 2, 7]],[[9, -2, -9],
+[1, 0, 1],
+[-9, 2, 7]],[[9, -2, -9],
+[1, 0, 1],
+[-9, 2, 9]],[[2, 1, -1],
+[5, 0, -5],
+[2, 0, -3]],[[1, 1, -1],
+[1, 0, -1],
+[1, 0, -1]],[[1, 1, 1],
+[0, 0, 0],
+[-1, -1, -1]],[[1/16, 2/16, 1/16],
+[2/16, 4/16, 2/16],
+[1/16, 2/16, 1/16]],[[-1, -1, -1],
+ [-1, 9, -1],
+ [-1, -1, -1]],[[0, -1, 0],
+  [-1, 5, -1],
+  [0, -1, 0]],[[1/9, 1/9, 1/9],
+   [1/9, 1/9, 1/9],
+   [1/9, 1/9, 1/9]],[[-1, 0, 1],
+    [-2, 0, 2],
+    [1, 0, 1]],[[5, 5, 5],
+     [-3, 0, -3],
+     [-3, -3, -3]],[[-1, -2, -1],
+      [0, 0, 0],
+      [1, 2, 1]]])
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+                                 
+            
+                                         
+[[-1, -1, -1],
+ [-1, 4, -1],
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                         
+    
+                          
+"""                               
+                                         
+
+
+out = model.convolve(np.array(img), filters, kernel_size)
 out = out.reshape(-1, 198, 148)
 
 Image.fromarray(out[0]).show()
