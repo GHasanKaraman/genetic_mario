@@ -1,0 +1,13 @@
+cheat
+  name: Unlimited Lives
+  code: 00d0d8=ad
+  enable
+
+cheat
+  name: Keep Power Up When You Die
+  code: 00d0b6=a9
+
+cheat
+  name: No Enemies
+  code: 00e2d3=ef
+
