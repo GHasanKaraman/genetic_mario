@@ -80,7 +80,7 @@ class Sequential:
         for i in range(len(trainable_conv_layers)):
             filters = trainable_conv_layers[i].filters
             kernel_size = trainable_conv_layers[i].kernel_size
-            self.params["conv"+str(i)+"w"] = np.random.randn(filters, kernel_size[0], kernel_size[1])
+            self.params["conv"+str(i)+"w"] = np.random.randint(0, 1, (filters, kernel_size[0], kernel_size[1]))
 
     def summary(self):
         w_list = []
@@ -117,9 +117,27 @@ class Sequential:
                         s3 = "{} {}".format(x*' ', self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0])
                 k = k+1
             print(s1, s2, s3)
-            
-    def forward(self, x):
-        self.x  = x
+
+    def iterate_slices(self, image, kernel_size):
+        h, w = image.shape
+
+        for r in range(h - (kernel_size[0] - 1)):
+            for c in range(w - kernel_size[1] - 1):
+                yield image[r:r+kernel_size[0], c:c+kernel_size[1]], r, c
+
+    def convolve(self, input, filters, kernel_size):
+        h, w = input.shape
+
+        output = np.zeros((h - kernel_size[0] + 1, w - kernel_size[1] + 1, filters.shape[0]))
+
+        for slice, r, c in self.iterate_slices(input, kernel_size):
+            output[r, c] = np.sum(slice*filters, axis = (1, 2))
+        return output
+
+    def forward(self, X):
+        self.X = X
+
+
 
 x = np.random.rand(4, 546)
 model = Sequential()
@@ -134,7 +152,20 @@ model.add(Sigmoid())
 model.initialize_weights()
 model.forward(x)
 
-for i in model.params:
-    print(i)
+from PIL import Image
 
-model.summary()
+img = Image.open(r"C:\Users\hasan\Desktop\angelina.jpg").convert("L")
+img = img.resize((150, 200))
+#img.show()
+num_filter = 15
+kernel_size = (3, 3)
+filters = np.random.randn(num_filter, kernel_size[0], kernel_size[1])
+filters = np.array([[[1, 2, 1],
+                    [2, 4, 2],
+                    [1, 2, 1]]])
+out = model.convolve(np.array(img), filters,kernel_size)
+out = out.reshape(-1, 198, 148)
+
+Image.fromarray(out[0]).show()
+
+#model.summary()
