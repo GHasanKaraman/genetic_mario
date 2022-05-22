@@ -80,7 +80,8 @@ class Sequential:
         for i in range(len(trainable_conv_layers)):
             filters = trainable_conv_layers[i].filters
             kernel_size = trainable_conv_layers[i].kernel_size
-            self.params["conv"+str(i)+"w"] = np.random.randn(filters, kernel_size[0], kernel_size[1])
+            for j in range(filters):
+                self.params["conv"+str(i)+"w"+str(j)] = np.random.random(kernel_size)
 
     def summary(self):
         w_list = []
@@ -88,9 +89,9 @@ class Sequential:
         for i in self.params:
             if 'w' in i:
                 w_list.append(i)
-        print('-'*75) 
+        print('-'*68) 
         print(7*' ' +"Layer (type)" + 15*' ' + "Output Shape" + ' '*15 + "Param #")
-        print('=' * 75)
+        print('=' * 68)
         k = 0
         total_param = 0
         
@@ -106,15 +107,16 @@ class Sequential:
                     x = 25 - len("[{},{},{},{}]".format(self.layers[i].filters, x1, x2, 1))
                     s2 = "{} [{},{},{},{}]".format(x*' ', self.layers[i].filters, x1, x2, 1)
                     x = 20 - len(str(self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]))
-        
                     s3 = "{} {}".format(' '*x, self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1])
+                    total_param = total_param + self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]
                 elif self.x.shape[2] == 3:
                     x1 = self.x.shape[0] - self.layers[i].kernel_size[0] + 1
                     x2 = self.x.shape[1] - self.layers[i].kernel_size[1] + 1
                     x = 22 - len(str(self.params[w_list[k]].shape[0])) - len(str(self.x.shape[1]))
                     s2 = "{} [{},{},{},{}]".format(x*' ', self.layers[i].filters, x1, x2, 3)
-                    x = self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]
-                    s3 = 'a'#"{} {}".format(' '*(20-len(str(x)), x)
+                    x = 20 - len(str(self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]))
+                    s3 = "{} {}".format(' '*x, self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1])
+                    total_param = total_param + self.layers[i].filters*self.layers[i].kernel_size[0]*self.layers[i].kernel_size[1]
             else:
                 x = 22 - len(str(self.params[w_list[k]].shape[0])) - len(str(self.x.shape[1]))
                 s2 = "{} [{},{}]".format(x*' ', self.params[w_list[k]].shape[0], self.x.shape[1])
@@ -138,16 +140,11 @@ class Sequential:
                         total_param = total_param + self.params[w_list[k - 1]].shape[0]*self.params[w_list[k]].shape[0]
             k = k+1
             print(s1, s2, s3)
-<<<<<<< Updated upstream
-=======
-        print('='*75 + "\n" + "Total Params: "+str(total_param))
-        print(self.layers[1].filters)
-        print(self.layers[1].kernel_size[0])
-        print(len(self.x.shape))
+        print('='*68 + "\n" + "Total Params: "+str(total_param))
+
 
         
                 
->>>>>>> Stashed changes
             
     def forward(self, x):
         self.x  = x
@@ -158,15 +155,12 @@ model.add(Input(4))
 model.add(Conv2D(256, (3,3)))
 model.add(Dense(128))
 model.add(LeakyReLu())
-model.add(Dense(25))
+model.add(Dense(25, use_bias=(False)))
 model.add(Tanh())
 model.add(Dense(13))
 model.add(Sigmoid())
 model.initialize_weights()
 model.forward(x)
-
-for i in model.params:
-    print(i)
 
 model.summary()
 
