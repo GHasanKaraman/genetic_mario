@@ -33,11 +33,12 @@ def controller(inputList):
 
 def checkImage():
     path = "./game/Screenshots"
-    last_image_path = path+"/"+os.listdir(path)[len(os.listdir(path))-1]
-    last_image_array = np.array(PIL.Image.open(last_image_path))
-    
-    if(np.sum(last_image_array) == 0):
-        pyautogui.press("f1")
+    if(len(os.listdir(path)) > 0):
+        last_image_path = path+"/"+os.listdir(path)[len(os.listdir(path))-1]
+        last_image_array = np.array(PIL.Image.open(last_image_path))
+
+        if(np.sum(last_image_array) == 0):
+            pyautogui.press("f1")
 
     if(len(os.listdir(path)) > 50):
         for i in os.listdir(path):
