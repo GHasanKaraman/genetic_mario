@@ -152,3 +152,7 @@ cython_debug/
 #.idea/
 core.py.7cf5b0ce43db5af4b59adeed54cf3cf5.tmp
 *.png
+game/stderr.txt
+game/snes9x.conf
+game/Saves/mario.oops
+game/stdout.txt
