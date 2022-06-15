@@ -2,7 +2,8 @@ import socket
 import threading
 import time
 import pickle
-from xmlrpc import client
+
+from sqlalchemy import false
 
 _port = 1234
 _server = socket.gethostbyname(socket.gethostname())
@@ -49,9 +50,13 @@ class User:
         time.sleep(0.1)
 
     def clientConnect(self, server, port):
-        self.client.connect((server, port))
-        thread1 = threading.Thread(target=self.getMessage, args=(self.client,))
-        thread1.start()
+        try:
+            self.client.connect((server, port))
+            thread1 = threading.Thread(target=self.getMessage, args=(self.client,))
+            thread1.start()
+            return True
+        except:
+            return False
 
     def clientDisconnect(self):
         self.client.close()

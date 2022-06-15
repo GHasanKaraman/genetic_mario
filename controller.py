@@ -1,5 +1,3 @@
-from sqlite3 import Time
-from xml.etree.ElementTree import PI
 import pyautogui
 import time
 import numpy as np
@@ -13,7 +11,8 @@ from tcpConnection import _server
 
 controllerUser = User("controller", 1234)
 controllerUser.startListen()
-controllerUser.clientConnect(_server,1235)
+while(controllerUser.clientConnect(_server, 1235) == False):
+    print("There is no AI")
 
 
 inputDict = {
@@ -31,7 +30,7 @@ def controller(index):
 
 
 def getSS():
-    SSdir = os.listdir(path); 
+    SSdir = os.listdir(path)
     if(len(SSdir) > 0):
         last_image_path = path+"/"+SSdir[len(SSdir)-1]
         last_image_array = np.array(Image.open(last_image_path))
@@ -63,7 +62,8 @@ def main():
                 ssCounter = ssCounter - (time.time() - last_time)
 
             if(len(controllerUser.messageBox) > 0):
-                controller(controllerUser.messageBox[len(controllerUser.messageBox)-1])
+                controller(controllerUser.messageBox[len(
+                    controllerUser.messageBox)-1])
 
             last_time = time.time()
 

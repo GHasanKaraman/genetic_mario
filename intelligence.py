@@ -15,7 +15,10 @@ POP_SIZE = 10
 
 intelligence_user = User("AI", 1235)
 intelligence_user.startListen()
-intelligence_user.clientConnect(tcpConnection._server, 1234)
+
+while(intelligence_user.clientConnect(tcpConnection._server, 1234) == False):
+    print("There is no Controller")
+
 
 def getLastImage():
     global image_counter
