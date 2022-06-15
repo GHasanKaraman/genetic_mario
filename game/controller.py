@@ -6,25 +6,18 @@ import numpy as np
 import os
 import subprocess
 from PIL import Image
-
+from tcpConnection import User
 
 # arrow keys, A=V, B=C, Y=X, X=D, START=SPACE, SELECT=ENTER, L=A, R=S, loadState = F1, screenShot = F12
+
+controllerUser = User("controller", 1234)
+controllerUser.startListen()
 
 inputDict = {
     0: "left",
     1: "right",
-    2: "up",
-    3: "down",
-    4: "v",
-    5: "c",
-    6: "x",
-    7: "d",
-    8: "space",
-    9: "enter",
-    10: "a",
-    11: "s",
-    12: "f1",
-    13: "f12"
+    2: "down",
+    3: "v",
 }
 path = "./game/Screenshots"
 ssTime = 0.2
@@ -48,27 +41,10 @@ def getSS():
         for i in os.listdir(path):
             os.remove(path+"/"+i)
 
-    getSquareLoss()
     pyautogui.press("f12")
 
 
-def getSquareLoss():
-    dirList = os.listdir(path)
-    if(len(dirList) >= 2):
-        last0_image_path = path+"/"+dirList[len(dirList)-1]
-        last0_image_array = np.array(Image.open(last0_image_path))/255.0
-
-        last1_image_path = path+"/"+dirList[len(dirList)-2]
-        last1_image_array = np.array(Image.open(last1_image_path))/255.0
-
-        pixNum = np.shape(last0_image_array)[
-            0] * np.shape(last0_image_array)[1]
-
-        print((np.sum(np.square(last0_image_array - last1_image_array)))/pixNum)
-
-
 def main():
-    inputs = np.zeros(len(inputDict))
     last_time = time.time()
     ssCounter = ssTime
 
@@ -83,7 +59,9 @@ def main():
             else:
                 ssCounter = ssCounter - (time.time() - last_time)
 
-            controller(inputs)
+            if(len(controllerUser.messageBox) > 0):
+                controller(controllerUser.messageBox[len(controllerUser.messageBox)-1])
+                
             last_time = time.time()
 
 
