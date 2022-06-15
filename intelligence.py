@@ -43,7 +43,7 @@ while True:
         print("NO INPUT!")
         intelligence_user.sendData("")
     else:
-        image = intelligence_user.data
+        image = np.fromstring(intelligence_user.data)
         brain = population[0].model
         y = np.argmax(brain.forward(np.array(image)))
         intelligence_user.sendData(y)

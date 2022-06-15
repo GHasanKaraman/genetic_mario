@@ -35,13 +35,18 @@ class User:
             thread1.start()
 
     def getData(self, client):
+        data = b""
         while True:
             try:
-                data = pickle.loads(client.recv(1024))
-                self.data = data
-            except:
+                packet = client.recv(4096)
+                if not packet: break
+                data += packet
+            except Exception as e:
+                print(str(e))
                 client.close()
                 break
+        array = pickle.loads(data)
+        self.data = array
 
     def sendData(self, msg):
         self.client.send(pickle.dumps(msg))
