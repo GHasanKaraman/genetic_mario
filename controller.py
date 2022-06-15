@@ -3,13 +3,18 @@ import time
 import numpy as np
 import os
 import subprocess
-from tcpConnection import NumpySocket
+
+from sqlalchemy import false
+from tcpConnection import User, _server
 import cv2
 
 # arrow keys, A=V, B=C, Y=X, X=D, START=SPACE, SELECT=ENTER, L=A, R=S, loadState = F1, screenShot = F12
 
-npSocket = NumpySocket()
-npSocket.startServer(9999)
+controller_user = User("controller_user", 1234)
+controller_user.startListen()
+while(controller_user.clientConnect(_server,1235) == False):
+    print("There is no AI") 
+
 
 inputDict = {
     0: "left",
@@ -18,9 +23,16 @@ inputDict = {
     3: "v",
 }
 path = "./game/Screenshots/mario000.png"
+lastKey = ""
+
 
 def controller(index):
-    pyautogui.press(inputDict[index])
+    global lastKey
+    if(lastKey != ""):
+        pyautogui.keyUp(lastKey)
+
+    lastKey = inputDict[index]
+    pyautogui.keyDown(lastKey)
 
 def getSS():
     if(os.path.exists(path)):
@@ -32,7 +44,10 @@ def getSS():
     if(np.sum(last_image_array) == 0):
         pyautogui.press("f1")
     else:
-        npSocket.send(last_image_array)
+        controller_user.sendData(last_image_array)
+        print("SENT")
+    
+    # time.sleep(5)
 
 
 def main():
@@ -42,9 +57,10 @@ def main():
     while True:
         if(pyautogui.getActiveWindowTitle() == "mario - Snes9x 1.60"):
             getSS()
-
-            print(np.argmax(npSocket.recieve()))
-            controller(np.argmax(npSocket.recieve()))
+            if(controller_user.dataChanged):
+                controller_user.dataChanged = False
+                print(np.argmax(controller_user.data))
+                controller(np.argmax(controller_user.data))
 
 
 if __name__ == "__main__":
