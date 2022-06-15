@@ -56,18 +56,3 @@ class User:
     def clientDisconnect(self):
         self.client.close()
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-
-client1 = User("client1", _port)
-client1.startListen()
-
-client2 = User("client2", _port+1)
-client2.startListen()
-
-client2.clientConnect(_server, _port)
-client1.clientConnect(_server, _port+1)
-
-
-client2.sendMessage(["Alican", "Gürkan", "Ömer", "Orhan"])
-
-print(client1.messageBox)
