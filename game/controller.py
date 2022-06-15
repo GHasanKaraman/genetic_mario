@@ -1,10 +1,12 @@
 from sqlite3 import Time
+from xml.etree.ElementTree import PI
 import pyautogui
 import time
 import numpy as np
 import os
 import subprocess
-import PIL
+from PIL import Image
+
 
 # arrow keys, A=V, B=C, Y=X, X=D, START=SPACE, SELECT=ENTER, L=A, R=S, loadState = F1, screenShot = F12
 
@@ -24,6 +26,8 @@ inputDict = {
     12: "f1",
     13: "f12"
 }
+path = "./game/Screenshots"
+ssTime = 0.2
 
 
 def controller(inputList):
@@ -32,11 +36,10 @@ def controller(inputList):
             pyautogui.press(inputDict[i])
 
 
-def checkImage():
-    path = "./game/Screenshots"
+def getSS():
     if(len(os.listdir(path)) > 0):
         last_image_path = path+"/"+os.listdir(path)[len(os.listdir(path))-1]
-        last_image_array = np.array(PIL.Image.open(last_image_path))
+        last_image_array = np.array(Image.open(last_image_path))
 
         if(np.sum(last_image_array) == 0):
             pyautogui.press("f1")
@@ -45,26 +48,44 @@ def checkImage():
         for i in os.listdir(path):
             os.remove(path+"/"+i)
 
+    getSquareLoss()
     pyautogui.press("f12")
 
 
-ssTime = 0.2
-ssCounter = ssTime
+def getSquareLoss():
+    dirList = os.listdir(path)
+    if(len(dirList) >= 2):
+        last0_image_path = path+"/"+dirList[len(dirList)-1]
+        last0_image_array = np.array(Image.open(last0_image_path))/255.0
 
-inputs = np.zeros(len(inputDict))
-last_time = time.time()
+        last1_image_path = path+"/"+dirList[len(dirList)-2]
+        last1_image_array = np.array(Image.open(last1_image_path))/255.0
 
-subprocess.Popen([r"./game/snes9x-x64.exe"])
-time.sleep(0.1)
-pyautogui.press(["altleft", "f","down","right","enter","f1"])
-while True:
-    if(pyautogui.getActiveWindowTitle() == "mario - Snes9x 1.60"):
-        if(ssCounter <= 0):
-            checkImage()
-            ssCounter = ssTime
-        else:
-            ssCounter = ssCounter - (time.time() - last_time)
+        pixNum = np.shape(last0_image_array)[
+            0] * np.shape(last0_image_array)[1]
 
-        controller(inputs)
+        print((np.sum(np.square(last0_image_array - last1_image_array)))/pixNum)
 
-        last_time = time.time()
+
+def main():
+    inputs = np.zeros(len(inputDict))
+    last_time = time.time()
+    ssCounter = ssTime
+
+    subprocess.Popen([r"./game/snes9x-x64.exe"])
+    time.sleep(0.3)
+    pyautogui.press(["altleft", "f", "down", "right", "enter", "f1"])
+    while True:
+        if(pyautogui.getActiveWindowTitle() == "mario - Snes9x 1.60"):
+            if(ssCounter <= 0):
+                getSS()
+                ssCounter = ssTime
+            else:
+                ssCounter = ssCounter - (time.time() - last_time)
+
+            controller(inputs)
+            last_time = time.time()
+
+
+if __name__ == "__main__":
+    main()
