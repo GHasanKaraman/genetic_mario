@@ -24,4 +24,4 @@ class Genetic:
                         weight[i][j] = brain2.params[param][i][j]
                     else:
                         weight[i][j] = random.uniform(-5, 5)
-        return Individual(new_model)
+        return new_model

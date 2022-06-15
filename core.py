@@ -12,13 +12,6 @@ class Conv2D(Layer):
         self.use_bias = False
 
         self.filters = np.array([
-        [[5, 0, -7],
-        [3, -5, 4],
-        [-9, 2, 7]],
-        
-        [[5, 0, -7],
-        [3, -5, 4],
-        [-9, 2, 7]],
         
         [[9, 2, -9],
         [3, -5, 1],
@@ -26,51 +19,11 @@ class Conv2D(Layer):
         
         [[9, -2, -9],
         [1, 0, 1],
-        [-9, 2, 7]],
-        
-        [[9, -2, -9],
-        [1, 0, 1],
         [-9, 2, 9]],
-        
-        [[2, 1, -1],
-        [5, 0, -5],
-        [2, 0, -3]],
-        
-        [[1, 1, -1],
-        [1, 0, -1],
-        [1, 0, -1]],
-        
-        [[1, 1, 1],
-        [0, 0, 0],
-        [-1, -1, -1]],
-        
-        [[1/16, 2/16, 1/16],
-        [2/16, 4/16, 2/16],
-        [1/16, 2/16, 1/16]],
         
         [[-1, -1, -1],
         [-1, 9, -1],
-        [-1, -1, -1]],
-        
-        [[0, -1, 0],
-        [-1, 5, -1],
-        [0, -1, 0]],
-        
-        [[1/9, 1/9, 1/9],
-        [1/9, 1/9, 1/9],
-        [1/9, 1/9, 1/9]],
-        
-        [[-1, 0, 1],
-        [-2, 0, 2],
-        [1, 0, 1]],
-        
-        [[5, 5, 5],
-        [-3, 0, -3],
-        [-3, -3, -3]],
-        
-        [[-1, -2, -1],
-        [0, 0, 0],
-        [1, 2, 1]]])
+        [-1, -1, -1]]])
 
         self.flatten_parameter = (input_shape[0]-2)*(input_shape[1]-2)*self.filters.shape[0]
 
@@ -247,22 +200,3 @@ class Sequential:
                 A = layer.function(Z)
 
         return A
-    
-
-
-x = np.random.rand(128, 256)
-
-model.initialize_weights()
-print(model.forward(x))
-
-
-
-from PIL import Image
-
-img = Image.open(r"C:\Users\hasan\Desktop\angelina.jpg").convert("L")
-img = img.resize((150, 200))
-
-for i in range(0):
-    Image.fromarray(out[:, :, i]).show()
-
-#model.summary()
