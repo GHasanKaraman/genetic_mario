@@ -7,11 +7,14 @@ import os
 import subprocess
 from PIL import Image
 from tcpConnection import User
+from tcpConnection import _server
 
 # arrow keys, A=V, B=C, Y=X, X=D, START=SPACE, SELECT=ENTER, L=A, R=S, loadState = F1, screenShot = F12
 
 controllerUser = User("controller", 1234)
 controllerUser.startListen()
+controllerUser.clientConnect(_server,1235)
+
 
 inputDict = {
     0: "left",
@@ -23,10 +26,8 @@ path = "./game/Screenshots"
 ssTime = 0.2
 
 
-def controller(inputList):
-    for i in range(len(inputList)):
-        if(inputList[i] >= 1):
-            pyautogui.press(inputDict[i])
+def controller(index):
+    pyautogui.press(inputDict[index])
 
 
 def getSS():
@@ -37,6 +38,7 @@ def getSS():
 
         if(np.sum(last_image_array) == 0):
             pyautogui.press("f1")
+            controllerUser.sendMessage("siyah")
 
     if(len(SSdir) > 50):
         for i in SSdir:
