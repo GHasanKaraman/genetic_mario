@@ -2,21 +2,17 @@ from genetic import Individual, Genetic
 import core
 from core import Sequential
 from core import Conv2D, Dense, ReLu, Sigmoid, Softmax
-import tcpConnection
-from tcpConnection import User
-from PIL import Image
+from tcpConnection import NumpySocket
 import numpy as np
+
+host_ip = '172.22.64.1'
+npSocket = NumpySocket()
+npSocket.startClient(host_ip, 9999)
 
 image_counter = 0
 
 SHAPE = (32, 28)
 POP_SIZE = 10
-
-intelligence_user = User("AI", 1235)
-intelligence_user.startListen()
-
-while(intelligence_user.clientConnect(tcpConnection._server, 1234) == False):
-    print("There is no Controller")
 
 def initialize_pop():
     pop = []
@@ -39,11 +35,7 @@ population = initialize_pop()
 next_gen = []
 
 while True:
-    if intelligence_user.data == "":
-        print("NO INPUT!")
-        intelligence_user.sendData("")
-    else:
-        image = np.fromstring(intelligence_user.data)
-        brain = population[0].model
-        y = np.argmax(brain.forward(np.array(image)))
-        intelligence_user.sendData(y)
+    image = np.array(npSocket.recieve())
+    brain = population[0].model
+    y = brain.forward(np.array(image))
+    npSocket.send(y)

@@ -5,6 +5,7 @@ import logging
 import numpy as np
 from io import BytesIO
 
+logging.basicConfig(level=logging.DEBUG)
 
 class NumpySocket():
     def __init__(self):
