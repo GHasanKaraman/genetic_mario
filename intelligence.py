@@ -51,8 +51,9 @@ next_gen = []
 
 while True:
     img = getLastImage()
-    brain = population.pop().model
+    brain = population[0].model
     y = np.argmax(brain.forward(np.array(img)))
     intelligence_user.sendMessage(y)
-    if(intelligence_user.messageBox.pop() == "siyah"):
-        break
+    if(len(intelligence_user.messageBox)!=0):
+        if(intelligence_user.messageBox[0] == "siyah"):
+            break
