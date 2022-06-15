@@ -21,7 +21,7 @@ inputDict = {
     2: "down",
     3: "v",
 }
-path = "./game/Screenshots"
+path = "./game/Screenshots/mario000.png"
 ssTime = 0.2
 
 
@@ -30,20 +30,17 @@ def controller(index):
 
 
 def getSS():
-    SSdir = os.listdir(path)
-    if(len(SSdir) > 0):
-        last_image_path = path+"/"+SSdir[len(SSdir)-1]
-        last_image_array = np.array(Image.open(last_image_path))
-
-        if(np.sum(last_image_array) == 0):
-            pyautogui.press("f1")
-            controllerUser.sendMessage("siyah")
-
-    if(len(SSdir) > 50):
-        for i in SSdir:
-            os.remove(path+"/"+i)
+    if(os.path.exists(path)):
+        os.remove(path)
 
     pyautogui.press("f12")
+    
+    last_image_array = np.array(Image.open(path))
+    if(np.sum(last_image_array) == 0):
+        controllerUser.sendData("")
+        pyautogui.press("f1")
+    else:
+        controllerUser.sendData(last_image_array)
 
 
 def main():
@@ -61,9 +58,8 @@ def main():
             else:
                 ssCounter = ssCounter - (time.time() - last_time)
 
-            if(len(controllerUser.messageBox) > 0):
-                controller(controllerUser.messageBox[len(
-                    controllerUser.messageBox)-1])
+            if(controllerUser.data != ""):
+                controller(controllerUser.data)
 
             last_time = time.time()
 
