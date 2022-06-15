@@ -30,15 +30,16 @@ def controller(inputList):
 
 
 def getSS():
-    if(len(os.listdir(path)) > 0):
-        last_image_path = path+"/"+os.listdir(path)[len(os.listdir(path))-1]
+    SSdir = os.listdir(path); 
+    if(len(SSdir) > 0):
+        last_image_path = path+"/"+SSdir[len(SSdir)-1]
         last_image_array = np.array(Image.open(last_image_path))
 
         if(np.sum(last_image_array) == 0):
             pyautogui.press("f1")
 
-    if(len(os.listdir(path)) > 50):
-        for i in os.listdir(path):
+    if(len(SSdir) > 50):
+        for i in SSdir:
             os.remove(path+"/"+i)
 
     pyautogui.press("f12")
@@ -61,7 +62,7 @@ def main():
 
             if(len(controllerUser.messageBox) > 0):
                 controller(controllerUser.messageBox[len(controllerUser.messageBox)-1])
-                
+
             last_time = time.time()
 
 
