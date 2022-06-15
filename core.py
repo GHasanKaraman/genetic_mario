@@ -7,15 +7,72 @@ class Layer:
         return self.layer_name
 
 class Conv2D(Layer):
-    def __init__(self, filters, kernel_size, activation=None, **kwargs):
+    def __init__(self, input_shape):
         self.layer_name = "Conv2D"
-        self.filters = filters
-        self.kernel_size = kernel_size
-        self.activation = activation
         self.use_bias = False
-        for key, value in kwargs.items():
-            if key == "input_shape":
-                self.input_shape = value
+
+        self.filters = np.array([
+        [[5, 0, -7],
+        [3, -5, 4],
+        [-9, 2, 7]],
+        
+        [[5, 0, -7],
+        [3, -5, 4],
+        [-9, 2, 7]],
+        
+        [[9, 2, -9],
+        [3, -5, 1],
+        [-9, 2, 7]],
+        
+        [[9, -2, -9],
+        [1, 0, 1],
+        [-9, 2, 7]],
+        
+        [[9, -2, -9],
+        [1, 0, 1],
+        [-9, 2, 9]],
+        
+        [[2, 1, -1],
+        [5, 0, -5],
+        [2, 0, -3]],
+        
+        [[1, 1, -1],
+        [1, 0, -1],
+        [1, 0, -1]],
+        
+        [[1, 1, 1],
+        [0, 0, 0],
+        [-1, -1, -1]],
+        
+        [[1/16, 2/16, 1/16],
+        [2/16, 4/16, 2/16],
+        [1/16, 2/16, 1/16]],
+        
+        [[-1, -1, -1],
+        [-1, 9, -1],
+        [-1, -1, -1]],
+        
+        [[0, -1, 0],
+        [-1, 5, -1],
+        [0, -1, 0]],
+        
+        [[1/9, 1/9, 1/9],
+        [1/9, 1/9, 1/9],
+        [1/9, 1/9, 1/9]],
+        
+        [[-1, 0, 1],
+        [-2, 0, 2],
+        [1, 0, 1]],
+        
+        [[5, 5, 5],
+        [-3, 0, -3],
+        [-3, -3, -3]],
+        
+        [[-1, -2, -1],
+        [0, 0, 0],
+        [1, 2, 1]]])
+
+        self.flatten_parameter = (input_shape[0]-2)*(input_shape[1]-2)*self.filters.shape[0]
 
 class Dense(Layer):
     def __init__(self, units, activation = None, use_bias = True, **kwargs):
@@ -57,16 +114,29 @@ class Sigmoid(Activation):
     def function(self, X):
         return 1/(1+np.exp(-X))
 
+class Softmax(Activation):
+    def __init__(self):
+        self.layer_name = "Sigmoid"
+
+    def function(self, X):
+        e = np.exp(X - np.max(X))
+        A = e/e.sum(axis = 0)
+        return A
+
 class Tanh(Activation):
     def __init__(self):
         self.layer_name = "Tanh"
 
     def function(self, X):
         return (np.exp(X)-np.exp(-X))/(np.exp(X)+np.exp(-X))
+        
 
 class LeakyReLu(Activation):
     def __init__(self):
         self.layer_name = "LeakyReLu"
+
+    def function(self, X):
+        return np.maximum(0.01*X, X)
 
 class Sequential:
     def __init__(self):
@@ -77,22 +147,14 @@ class Sequential:
         self.layers.append(layer)
 
     def initialize_weights(self):
-        trainable_layers = list(filter(lambda layer: issubclass(type(layer), Dense) == True, self.layers)) 
-        if hasattr(trainable_layers[0], "input_dim"):
-            trainable_layers.insert(0, Input(trainable_layers[0].input_dim))
-            delattr(trainable_layers[1], "input_dim")
+        trainable_layers = list(filter(lambda layer: issubclass(type(layer), Dense) == True, self.layers))
         for i in range(len(trainable_layers) - 1):
-            if hasattr(trainable_layers[i+1], "input_dim"):
-                raise RuntimeError("You cannot add multiple input dimensions. It is only for the first layer!")
-            self.params["w"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, trainable_layers[i].units)
+            self.params["w"+str(i+1)] = np.random.uniform(-5, 5, (trainable_layers[i+1].units, trainable_layers[i].units))
             if trainable_layers[i+1].use_bias == True:
-                self.params["b"+str(i+1)] = np.random.rand(trainable_layers[i+1].units, 1)
+                self.params["b"+str(i+1)] = np.random.uniform(-5, 5, (trainable_layers[i+1].units, 1))
 
-        trainable_conv_layers = list(filter(lambda layer: issubclass(type(layer), Conv2D) == True, self.layers))
-        for i in range(len(trainable_conv_layers)):
-            filters = trainable_conv_layers[i].filters
-            kernel_size = trainable_conv_layers[i].kernel_size
-            self.params["conv"+str(i)+"w"] = np.random.randint(0, 1, (filters, kernel_size[0], kernel_size[1]))
+        self.params["w0"] = np.random.uniform(-5, 5, (trainable_layers[0].units, self.layers[0].flatten_parameter))
+        self.params["b0"] = np.random.uniform(-5, 5, (trainable_layers[0].units, 1))
 
     def summary(self):
         w_list = []
@@ -169,92 +231,38 @@ class Sequential:
         return output
 
     def forward(self, X):
-        self.X = X
-
+        Z = X.copy()
+        A = Z.copy()
+        d = -1
         for layer in self.layers:
-            pass
+            if layer.layer_name == "Conv2D":
+                Z = self.convolve(Z, layer.filters)
+                Z = Z.reshape(layer.flatten_parameter, -1)
+            elif layer.layer_name == "Dense":
+                d+=1
+                Z = np.dot(self.params["w"+str(d)], A)
+                if layer.use_bias == True:
+                    Z = Z + self.params["b"+str(d)]
+            elif issubclass(type(layer), Activation) == True:
+                A = layer.function(Z)
 
-model = Sequential()
-model.add(Input(4))
-model.add(Conv2D(5, (3,3)))
-model.add(Dense(128))
-model.add(ReLu())
-model.add(Dense(25, use_bias=(False)))
-model.add(Tanh())
-model.add(Dense(13))
-model.add(Sigmoid())
+        return A
+    
+
+
+x = np.random.rand(128, 256)
+
 model.initialize_weights()
-model.forward(x)
+print(model.forward(x))
+
+
 
 from PIL import Image
 
 img = Image.open(r"C:\Users\hasan\Desktop\angelina.jpg").convert("L")
 img = img.resize((150, 200))
-#filters = np.random.randn(num_filter, kernel_size[0], kernel_size[1])
-filters = np.array([
-    [[5, 0, -7],
-    [3, -5, 4],
-    [-9, 2, 7]],
-    
-    [[5, 0, -7],
-    [3, -5, 4],
-    [-9, 2, 7]],
-    
-    [[9, 2, -9],
-    [3, -5, 1],
-    [-9, 2, 7]],
-    
-    [[9, -2, -9],
-    [1, 0, 1],
-    [-9, 2, 7]],
-    
-    [[9, -2, -9],
-    [1, 0, 1],
-    [-9, 2, 9]],
-    
-    [[2, 1, -1],
-    [5, 0, -5],
-    [2, 0, -3]],
-    
-    [[1, 1, -1],
-    [1, 0, -1],
-    [1, 0, -1]],
-    
-    [[1, 1, 1],
-    [0, 0, 0],
-    [-1, -1, -1]],
-    
-    [[1/16, 2/16, 1/16],
-    [2/16, 4/16, 2/16],
-    [1/16, 2/16, 1/16]],
-    
-    [[-1, -1, -1],
-    [-1, 9, -1],
-    [-1, -1, -1]],
-    
-    [[0, -1, 0],
-    [-1, 5, -1],
-    [0, -1, 0]],
-    
-    [[1/9, 1/9, 1/9],
-    [1/9, 1/9, 1/9],
-    [1/9, 1/9, 1/9]],
-    
-    [[-1, 0, 1],
-    [-2, 0, 2],
-    [1, 0, 1]],
-    
-    [[5, 5, 5],
-    [-3, 0, -3],
-    [-3, -3, -3]],
-    
-    [[-1, -2, -1],
-    [0, 0, 0],
-    [1, 2, 1]]])
 
-out = model.convolve(np.array(img), filters)
-
-for i in range(14):
+for i in range(0):
     Image.fromarray(out[:, :, i]).show()
 
 #model.summary()
