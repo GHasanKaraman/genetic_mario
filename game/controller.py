@@ -1,8 +1,9 @@
-from prometheus_client import Counter
+from sqlite3 import Time
 import pyautogui
 import time
 import numpy as np
 import os
+import subprocess
 import PIL
 
 # arrow keys, A=V, B=C, Y=X, X=D, START=SPACE, SELECT=ENTER, L=A, R=S, loadState = F1, screenShot = F12
@@ -53,6 +54,9 @@ ssCounter = ssTime
 inputs = np.zeros(len(inputDict))
 last_time = time.time()
 
+subprocess.Popen([r"./game/snes9x-x64.exe"])
+time.sleep(0.1)
+pyautogui.press(["altleft", "f","down","right","enter","f1"])
 while True:
     if(pyautogui.getActiveWindowTitle() == "mario - Snes9x 1.60"):
         if(ssCounter <= 0):
@@ -61,6 +65,6 @@ while True:
         else:
             ssCounter = ssCounter - (time.time() - last_time)
 
-    last_time = time.time()
+        controller(inputs)
 
-    controller(inputs)
+        last_time = time.time()
