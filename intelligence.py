@@ -4,7 +4,6 @@ from core import Sequential
 from core import Conv2D, Dense, ReLu, Sigmoid, Softmax
 import tcpConnection
 from tcpConnection import User
-import controller
 from PIL import Image
 import numpy as np
 
@@ -52,7 +51,7 @@ next_gen = []
 
 while True:
     img = getLastImage()
-    brain = population.pop()
+    brain = population.pop().model
     y = np.argmax(brain.forward(np.array(img)))
     intelligence_user.sendMessage(y)
     if(intelligence_user.messageBox.pop() == "siyah"):
