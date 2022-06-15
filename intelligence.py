@@ -18,17 +18,6 @@ intelligence_user.startListen()
 while(intelligence_user.clientConnect(tcpConnection._server, 1234) == False):
     print("There is no Controller")
 
-
-def getLastImage():
-    global image_counter
-    if image_counter > 50:
-        image_counter = 0
-    image_text = "0"*(3-len(str(image_counter)))+str(image_counter)
-    image = Image.open(r".\game\Screenshots\mario"+f"{image_text}.png").convert("L")
-    image = image.resize(SHAPE)
-    image_counter += 1
-    return image
-
 def initialize_pop():
     pop = []
     for _ in range(POP_SIZE):
@@ -50,10 +39,11 @@ population = initialize_pop()
 next_gen = []
 
 while True:
-    img = getLastImage()
-    brain = population[0].model
-    y = np.argmax(brain.forward(np.array(img)))
-    intelligence_user.sendMessage(y)
-    if(len(intelligence_user.messageBox)!=0):
-        if(intelligence_user.messageBox[0] == "siyah"):
-            break
+    if intelligence_user.data == "":
+        print("NO INPUT!")
+        intelligence_user.sendData("")
+    else:
+        image = intelligence_user.data
+        brain = population[0].model
+        y = np.argmax(brain.forward(np.array(image)))
+        intelligence_user.sendData(y)
