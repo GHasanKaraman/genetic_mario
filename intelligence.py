@@ -33,6 +33,10 @@ def controller(index):
     lastKey = inputDict[index]
     keyboard.send_keys("{"+lastKey+" down}")
 
+SHAPE = (256, 224)
+SCALE_PERCENT = 50
+SHAPE = (int(SHAPE[0] * SCALE_PERCENT / 100), int(SHAPE[1] * SCALE_PERCENT / 100))
+
 def getSS():
     ssList = os.listdir(path)
     if(len(ssList) > 0):
@@ -40,14 +44,19 @@ def getSS():
             os.remove(path + i)
 
     keyboard.send_keys("{F12}")
-    time.sleep(0.2)
+    time.sleep(0.1)
     last_image_array = cv2.imread(path + os.listdir(path)[0], 0)
+    last_image_array[15:32, 152:177] = 255
+    width = int(last_image_array.shape[1] * SCALE_PERCENT / 100)
+    height = int(last_image_array.shape[0] * SCALE_PERCENT / 100)
+    dim = (width, height)
+
+    last_image_array = cv2.resize(last_image_array, dim, interpolation = cv2.INTER_AREA)
     if(np.sum(last_image_array) == 0):
         keyboard.send_keys("{F1}")
     else:
         return last_image_array
 
-SHAPE = (256, 224)
 POP_SIZE = 10
 
 def initialize_pop():
@@ -67,24 +76,59 @@ def initialize_pop():
         pop.append(Individual(brain))
     return pop
 
-population = initialize_pop()
-next_gen = []
 
 combined_wram = Memory('Combined WRAM')
-newX = 0
-oldX = 0
+
+def isDied(image):
+    if np.sum(image) == 0:
+        return True
+    oldX = combined_wram.read_s16_le(0x94)
+    newX = combined_wram.read_s16_le(0x94)
+    i = 0
+    if combined_wram.read_s16_le(0x72) != 1024:
+        while oldX == newX:
+            i+=1
+            newX = combined_wram.read_s16_le(0x94)
+            if i >= 30:
+                return True
+    else:
+        while combined_wram.read_s16_le(0x72) == 1024:
+            i+=1
+            if i >= 150:
+                return True
+            
+    return False
+
+next_gen = initialize_pop()
+individual = next_gen[POP_SIZE - 1]
+population = []
+genotype = 1
+gen = 1
 while True:
     try:
         findwindows.find_window(
                     title="Super Mario World (USA) [SNES] - BizHawk")
+        
+        if len(population) == 0:
+            population = Genetic().crossover(next_gen)
+            bfitness = sorted(next_gen, key = lambda i:i.fitness, reverse=True)[0].fitness
+            print(f"The Best Fitness Score is {bfitness}")
+            next_gen.clear()
+            print("New Marios Generated!")
+            gen+=1
+            genotype = 1
+
+        time.sleep(0.1)           
         image = getSS()
-        oldX = newX
-        print("ASD")
-        newX = combined_wram.read_s16_le(0x94)
-        print(newX, oldX)
-        time.sleep(0.1)
-        brain = population[0].model
-        y = brain.forward(np.array(image))
+
+        if isDied(image):
+            print(f"Generation = {gen}, Genotype = {genotype}")
+            individual.fitness = combined_wram.read_s16_le(0x94)
+            next_gen.append(individual)
+            individual = population.pop()
+            genotype+=1
+            keyboard.send_keys("{F1}")
+        y = individual.model.forward(np.array(image))
         controller(np.argmax(y))
-    except:
-        pass
+    except Exception as e:
+        print(str(e))
